@@ -1,5 +1,6 @@
 package com.helium.nettymq.broker.config;
 
+import com.helium.nettymq.broker.cache.CommonCache;
 import com.helium.nettymq.broker.constants.BrokerConstants;
 import io.netty.util.internal.StringUtil;
 
@@ -12,5 +13,6 @@ public class GlobalPropertiesLoader {
             throw new IllegalArgumentException("mq home is null");
         }
         globalProperties.setNettyMqHome(mqHome);
+        CommonCache.setGlobalProperties(globalProperties);
     }
 }
