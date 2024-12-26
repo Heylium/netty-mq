@@ -8,7 +8,8 @@ public class GlobalPropertiesLoader {
 
     public void loadProperties() {
         GlobalProperties globalProperties = new GlobalProperties();
-        String mqHome = System.getProperty(BrokerConstants.MQ_HOME);
+        // String mqHome = System.getProperty(BrokerConstants.MQ_HOME);
+        String mqHome = System.getenv(BrokerConstants.MQ_HOME);
         if (StringUtil.isNullOrEmpty(mqHome)) {
             throw new IllegalArgumentException("mq home is null");
         }
