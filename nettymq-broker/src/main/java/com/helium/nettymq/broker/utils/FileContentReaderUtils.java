@@ -22,7 +22,7 @@ public class FileContentReaderUtils {
     }
 
     public static void main(String[] args) {
-        String content = FileContentReaderUtils.readFromFile("C:\\Programming\\programming-works\\github-projects\\Java\\eaglemq\\nettymq\\broker\\config\\nettymq-topic.json");
+        String content = FileContentReaderUtils.readFromFile("C:\\Programming\\programming-works\\github-projects\\Java\\eaglemq\\nettymq\\broker\\config\\mq-topic.json");
         System.out.println(content);
 
         List<MqTopicModel> mqTopicModelList = JSON.parseArray(content, MqTopicModel.class);

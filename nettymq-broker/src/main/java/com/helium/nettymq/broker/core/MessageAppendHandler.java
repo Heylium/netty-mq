@@ -13,7 +13,7 @@ public class MessageAppendHandler {
         this.prepareMMapLoading();
     }
 
-    private void prepareMMapLoading() throws IOException {
+    public void prepareMMapLoading() throws IOException {
         MMapFileModel mapFileModel = new MMapFileModel();
         mapFileModel.loadFileInMMap(filePath, 0, 1 * 1024 * 1024);
         mMapFileModelManager.put(topicName, mapFileModel);

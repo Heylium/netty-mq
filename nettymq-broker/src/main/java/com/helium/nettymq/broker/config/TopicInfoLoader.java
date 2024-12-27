@@ -9,11 +9,11 @@ public class TopicInfoLoader {
 
     public void loadProperties() {
         GlobalProperties globalProperties = CommonCache.getGlobalProperties();
-        String basePath = globalProperties.getNettyMqHome();
+        String basePath = globalProperties.getMqHome();
         if (StringUtil.isNullOrEmpty(basePath)) {
             throw new IllegalArgumentException("MQ_HOME is invalid!");
         }
-        String topicJsonFilePath = basePath + "/broker/config/nettymq-topic.json";
+        String topicJsonFilePath = basePath + "/broker/config/mq-topic.json";
         topicInfo = new TopicInfo();
     }
 }
