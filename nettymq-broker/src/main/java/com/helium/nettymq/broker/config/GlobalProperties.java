@@ -5,13 +5,13 @@ public class GlobalProperties {
     /**
      * 读取环境变量中配置的mq存储绝对路径地址
      */
-    private String nettyMqHome;
+    private String mqHome;
 
-    public String getNettyMqHome() {
-        return nettyMqHome;
+    public String getMqHome() {
+        return mqHome;
     }
 
-    public void setNettyMqHome(String nettyMqHome) {
-        this.nettyMqHome = nettyMqHome;
+    public void setMqHome(String mqHome) {
+        this.mqHome = mqHome;
     }
 }
