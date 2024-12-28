@@ -5,7 +5,7 @@ import com.helium.nettymq.broker.cache.CommonCache;
 import com.helium.nettymq.broker.config.GlobalPropertiesLoader;
 import com.helium.nettymq.broker.config.MqTopicLoader;
 import com.helium.nettymq.broker.constants.BrokerConstants;
-import com.helium.nettymq.broker.core.MessageAppendHandler;
+import com.helium.nettymq.broker.core.CommentLogAppendHandler;
 import com.helium.nettymq.broker.model.MqTopicModel;
 
 import java.io.IOException;
@@ -15,14 +15,14 @@ public class BrokerStartUp {
 
     private static GlobalPropertiesLoader globalPropertiesLoader;
     private static MqTopicLoader mqTopicLoader;
-    private static MessageAppendHandler messageAppendHandler;
+    private static CommentLogAppendHandler messageAppendHandler;
 
     private static void initProperties() throws IOException {
         globalPropertiesLoader = new GlobalPropertiesLoader();
         globalPropertiesLoader.loadProperties();
         mqTopicLoader = new MqTopicLoader();
         mqTopicLoader.loadProperties();
-        messageAppendHandler = new MessageAppendHandler();
+        messageAppendHandler = new CommentLogAppendHandler();
 
         List<MqTopicModel> mqTopicModelList = CommonCache.getMqTopicModelList();
         for (MqTopicModel mqTopicModel : mqTopicModelList) {

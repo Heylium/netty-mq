@@ -2,14 +2,14 @@ package com.helium.nettymq.broker.core;
 
 import java.io.IOException;
 
-public class MessageAppendHandler {
+public class CommentLogAppendHandler {
 
     private static String filePath = "C:\\Programming\\programming-works\\github-projects\\Java\\eaglemq\\nettymq\\broker\\commitlog\\order_cancel_topic\\00000000";
     public static String topicName = "order_cancel_topic";
 
     private MMapFileModelManager mMapFileModelManager = new MMapFileModelManager();
 
-    public MessageAppendHandler() throws IOException {
+    public CommentLogAppendHandler() throws IOException {
         this.prepareMMapLoading();
     }
 
@@ -37,7 +37,7 @@ public class MessageAppendHandler {
     }
 
     public static void main(String[] args) throws IOException {
-        MessageAppendHandler messageAppendHandler = new MessageAppendHandler();
+        CommentLogAppendHandler messageAppendHandler = new CommentLogAppendHandler();
         messageAppendHandler.appendMsg(topicName, "this is content");
         messageAppendHandler.readMsg(topicName);
     }
