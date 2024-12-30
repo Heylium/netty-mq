@@ -4,12 +4,10 @@ package com.helium.nettymq.broker;
 import com.helium.nettymq.broker.cache.CommonCache;
 import com.helium.nettymq.broker.config.GlobalPropertiesLoader;
 import com.helium.nettymq.broker.config.MqTopicLoader;
-import com.helium.nettymq.broker.constants.BrokerConstants;
 import com.helium.nettymq.broker.core.CommentLogAppendHandler;
 import com.helium.nettymq.broker.model.MqTopicModel;
 
 import java.io.IOException;
-import java.util.List;
 
 public class BrokerStartUp {
 
@@ -24,14 +22,9 @@ public class BrokerStartUp {
         mqTopicLoader.loadProperties();
         messageAppendHandler = new CommentLogAppendHandler();
 
-        List<MqTopicModel> mqTopicModelList = CommonCache.getMqTopicModelList();
-        for (MqTopicModel mqTopicModel : mqTopicModelList) {
+        for (MqTopicModel mqTopicModel : CommonCache.getMqTopicModelMap().values()) {
             String topicName = mqTopicModel.getTopic();
-            String filePath = CommonCache.getGlobalProperties().getMqHome()
-                    + BrokerConstants.BASE_STORE_PATH
-                    + topicName
-                    + "/00000001";
-            messageAppendHandler.prepareMMapLoading();;
+            messageAppendHandler.prepareMMapLoading(topicName);;
         }
     }
 

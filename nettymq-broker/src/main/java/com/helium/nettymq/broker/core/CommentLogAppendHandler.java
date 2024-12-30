@@ -9,13 +9,10 @@ public class CommentLogAppendHandler {
 
     private MMapFileModelManager mMapFileModelManager = new MMapFileModelManager();
 
-    public CommentLogAppendHandler() throws IOException {
-        this.prepareMMapLoading();
-    }
 
-    public void prepareMMapLoading() throws IOException {
+    public void prepareMMapLoading(String topicName) throws IOException {
         MMapFileModel mapFileModel = new MMapFileModel();
-        mapFileModel.loadFileInMMap(filePath, 0, 1 * 1024 * 1024);
+        mapFileModel.loadFileInMMap(topicName, 0, 1 * 1024 * 1024);
         mMapFileModelManager.put(topicName, mapFileModel);
     }
 

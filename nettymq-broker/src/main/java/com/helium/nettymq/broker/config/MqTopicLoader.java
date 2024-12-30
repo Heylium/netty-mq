@@ -19,6 +19,6 @@ public class MqTopicLoader {
         String topicJsonFilePath = basePath + "/config/mq-topic.json";
         String fileContent = FileContentReaderUtils.readFromFile(topicJsonFilePath);
         List<MqTopicModel> mqTopicModelList = JSON.parseArray(fileContent, MqTopicModel.class);
-        CommonCache.setMqTopicModelList(mqTopicModelList);
+        CommonCache.setMqTopicModelMap(mqTopicModelList);
     }
 }

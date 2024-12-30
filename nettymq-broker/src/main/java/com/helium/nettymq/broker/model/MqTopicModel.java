@@ -5,6 +5,7 @@ import java.util.List;
 public class MqTopicModel {
 
     private String topic;
+    private CommitLogModel commitLogModel;
     private List<QueueModel> queueList;
     private Long createAt;
     private Long updateAt;
@@ -39,6 +40,14 @@ public class MqTopicModel {
 
     public void setUpdateAt(Long updateAt) {
         this.updateAt = updateAt;
+    }
+
+    public CommitLogModel getCommitLogModel() {
+        return commitLogModel;
+    }
+
+    public void setCommitLogModel(CommitLogModel commitLogModel) {
+        this.commitLogModel = commitLogModel;
     }
 
     @Override
