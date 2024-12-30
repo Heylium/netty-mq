@@ -1,5 +1,11 @@
 package com.helium.nettymq.broker.core;
 
+import com.helium.nettymq.broker.cache.CommonCache;
+import com.helium.nettymq.broker.constants.BrokerConstants;
+import com.helium.nettymq.broker.model.CommitLogModel;
+import com.helium.nettymq.broker.model.MqTopicModel;
+import com.helium.nettymq.broker.utils.CommitLogFileNameUtil;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,21 +29,62 @@ public class MMapFileModel {
     private File file;
     private MappedByteBuffer mappedByteBuffer;
     private FileChannel fileChannel;
+    private String topic;
 
     /**
      * 指定offset做文件的映射
      *
-     * @param filePath 文件路径
+     * @param topicName 文件路径
      * @param startOffset 开始映射的offset
      * @param mappedSize 映射的文件大小
      */
-    public void loadFileInMMap(String filePath, int startOffset, int mappedSize) throws IOException {
+    public void loadFileInMMap(String topicName, int startOffset, int mappedSize) throws IOException {
+        String filePath = getLatestCommitLogFile(topicName);
         file = new File(filePath);
         if (!file.exists()) {
             throw new FileNotFoundException("filePath is " + filePath + " inValid");
         }
         fileChannel = new RandomAccessFile(file, "rw").getChannel();
         mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, startOffset, mappedSize);
+    }
+
+    /**
+     * 获取最新的commitLog文件路径
+     * @param topicName
+     * @return
+     */
+    private String getLatestCommitLogFile(String topicName) {
+        MqTopicModel mqTopicModel = CommonCache.getMqTopicModelMap().get(topicName);
+        if (mqTopicModel == null) {
+            throw new IllegalArgumentException("topic is inValid! topicName is " + topicName);
+        }
+        CommitLogModel commitLogModel = mqTopicModel.getCommitLogModel();
+        long diff = commitLogModel.getOffsetLimit() - commitLogModel.getOffset();
+        String filePath = null;
+        if (diff == 0) { //已经写满了
+            filePath = this.createNewCommitLogFile(topicName, commitLogModel);
+        } else if (diff > 0) { //还有机会写入
+            filePath = CommonCache.getGlobalProperties().getMqHome()
+                    + BrokerConstants.BASE_STORE_PATH
+                    + topicName
+                    + commitLogModel.getFileName();
+        }
+        return filePath;
+    }
+
+    private String createNewCommitLogFile(String topicName, CommitLogModel commitLogModel) {
+        String newFileName = CommitLogFileNameUtil.incrCommitLogFileName(commitLogModel.getFileName());
+        String newFilePath = CommonCache.getGlobalProperties().getMqHome()
+                + BrokerConstants.BASE_STORE_PATH
+                + topicName
+                + newFileName;
+        File newCommitLogFile = new File(newFilePath);
+        try {
+            newCommitLogFile.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return newFilePath;
     }
 
     /**
