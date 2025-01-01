@@ -2,6 +2,7 @@ package com.helium.nettymq.broker.core;
 
 import com.helium.nettymq.broker.cache.CommonCache;
 import com.helium.nettymq.broker.constants.BrokerConstants;
+import com.helium.nettymq.broker.model.CommitLogMessageModel;
 import com.helium.nettymq.broker.model.CommitLogModel;
 import com.helium.nettymq.broker.model.MqTopicModel;
 import com.helium.nettymq.broker.utils.CommitLogFileNameUtil;
@@ -108,22 +109,22 @@ public class MMapFileModel {
 
     /**
      * 更高性能的写入api
-     * @param content
+     * @param commitLogMessageModel
      */
-    public void writeContent(byte[] content) {
-        this.writeContent(content, false);
+    public void writeContent(CommitLogMessageModel commitLogMessageModel) {
+        this.writeContent(commitLogMessageModel, false);
     }
 
     /**
      * 写入数据到磁盘当中
      *
-     * @param content
+     * @param commitLogMessageModel
      * @param force
      */
-    public void writeContent(byte[] content, boolean force) {
+    public void writeContent(CommitLogMessageModel commitLogMessageModel, boolean force) {
         // 默认刷到page cache中，
         // 如果需要强制刷盘，需要兼容
-        mappedByteBuffer.put(content);
+        mappedByteBuffer.put(commitLogMessageModel.convertToBytes());
         // 强制刷盘
         if (force) {
             mappedByteBuffer.force();

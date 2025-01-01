@@ -1,5 +1,7 @@
 package com.helium.nettymq.broker.core;
 
+import com.helium.nettymq.broker.model.CommitLogMessageModel;
+
 import java.io.IOException;
 
 public class CommentLogAppendHandler {
@@ -16,12 +18,15 @@ public class CommentLogAppendHandler {
         mMapFileModelManager.put(topicName, mapFileModel);
     }
 
-    public void appendMsg(String topic, String content) {
-        MMapFileModel mapFileModel = mMapFileModelManager.get(topicName);
+    public void appendMsg(String topic, byte[] content) {
+        MMapFileModel mapFileModel = mMapFileModelManager.get(topic);
         if (mapFileModel == null) {
             throw new RuntimeException("topic is invalid!");
         }
-        mapFileModel.writeContent(content.getBytes());
+        CommitLogMessageModel commitLogMessageModel = new CommitLogMessageModel();
+        commitLogMessageModel.setSize(content.length);
+        commitLogMessageModel.setContent(content);
+        mapFileModel.writeContent(commitLogMessageModel);
     }
 
     public void readMsg(String topic) {
@@ -35,7 +40,7 @@ public class CommentLogAppendHandler {
 
     public static void main(String[] args) throws IOException {
         CommentLogAppendHandler messageAppendHandler = new CommentLogAppendHandler();
-        messageAppendHandler.appendMsg(topicName, "this is content");
+        messageAppendHandler.appendMsg(topicName, "this is content".getBytes());
         messageAppendHandler.readMsg(topicName);
     }
 
