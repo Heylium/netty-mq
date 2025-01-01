@@ -7,6 +7,7 @@ import com.helium.nettymq.broker.utils.FileContentReaderUtils;
 import io.netty.util.internal.StringUtil;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MqTopicLoader {
 
@@ -19,6 +20,6 @@ public class MqTopicLoader {
         String topicJsonFilePath = basePath + "/config/mq-topic.json";
         String fileContent = FileContentReaderUtils.readFromFile(topicJsonFilePath);
         List<MqTopicModel> mqTopicModelList = JSON.parseArray(fileContent, MqTopicModel.class);
-        CommonCache.setMqTopicModelMap(mqTopicModelList);
+        CommonCache.setMqTopicModelMap(mqTopicModelList.stream().collect(Collectors.toMap(MqTopicModel::getTopic, item -> item)));
     }
 }
