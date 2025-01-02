@@ -40,13 +40,25 @@ public class MMapFileModel {
      * @param mappedSize 映射的文件大小
      */
     public void loadFileInMMap(String topicName, int startOffset, int mappedSize) throws IOException {
+        this.topic = topicName;
         String filePath = getLatestCommitLogFile(topicName);
+        this.doMMap(filePath, startOffset, mappedSize);
+    }
+
+    /**
+     * 执行mmap步骤
+     * @param filePath
+     * @param startOffset
+     * @param mappedSize
+     * @throws IOException
+     */
+    private void doMMap(String filePath, int startOffset, int mappedSize) throws IOException {
         file = new File(filePath);
         if (!file.exists()) {
             throw new FileNotFoundException("filePath is " + filePath + " inValid");
         }
-        fileChannel = new RandomAccessFile(file, "rw").getChannel();
-        mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, startOffset, mappedSize);
+        this.fileChannel = new RandomAccessFile(file, "rw").getChannel();
+        this.mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, startOffset, mappedSize);
     }
 
     /**
@@ -111,7 +123,7 @@ public class MMapFileModel {
      * 更高性能的写入api
      * @param commitLogMessageModel
      */
-    public void writeContent(CommitLogMessageModel commitLogMessageModel) {
+    public void writeContent(CommitLogMessageModel commitLogMessageModel) throws IOException {
         this.writeContent(commitLogMessageModel, false);
     }
 
@@ -121,13 +133,32 @@ public class MMapFileModel {
      * @param commitLogMessageModel
      * @param force
      */
-    public void writeContent(CommitLogMessageModel commitLogMessageModel, boolean force) {
+    public void writeContent(CommitLogMessageModel commitLogMessageModel, boolean force) throws IOException {
+        //offset会用一个原子类AtomicLong去管理
+        //线程安全问题：线程1：111，线程2：122
+        //加锁机制 （锁的选择非常重要）
+        this.checkCommitLogHasEnableSpace(commitLogMessageModel);
+
         // 默认刷到page cache中，
         // 如果需要强制刷盘，需要兼容
         mappedByteBuffer.put(commitLogMessageModel.convertToBytes());
         // 强制刷盘
         if (force) {
             mappedByteBuffer.force();
+        }
+    }
+
+    private void checkCommitLogHasEnableSpace(CommitLogMessageModel commitLogMessageModel) throws IOException {
+        MqTopicModel mqTopicModel = CommonCache.getMqTopicModelMap().get(topic);
+        CommitLogModel commitLogModel = mqTopicModel.getCommitLogModel();
+        long writeAbleOffsetNum = commitLogModel.getOffsetLimit() - commitLogModel.getOffset();
+        //空间不足，需要创建新的commitLog文件并且做映射
+        if (!(writeAbleOffsetNum >= commitLogMessageModel.getSize())) {
+            //00000000文件 -》00000001文件
+            //commitLog剩余150byte大小的空间，最新的消息体积是151byte
+            String newCommitLogPath = this.createNewCommitLogFile(topic, commitLogModel);
+            // 新文件路径映射进来
+            this.doMMap(newCommitLogPath, 0, BrokerConstants.COMMIT_LOG_DEFAULT_MMAP_SIZE);
         }
     }
 

@@ -18,7 +18,7 @@ public class CommentLogAppendHandler {
         mMapFileModelManager.put(topicName, mapFileModel);
     }
 
-    public void appendMsg(String topic, byte[] content) {
+    public void appendMsg(String topic, byte[] content) throws IOException {
         MMapFileModel mapFileModel = mMapFileModelManager.get(topic);
         if (mapFileModel == null) {
             throw new RuntimeException("topic is invalid!");
