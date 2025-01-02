@@ -33,7 +33,7 @@ public class BrokerStartUp {
         initProperties();
         //模拟初始化文件映射
         String topic = "order_cancel_topic";
-        messageAppendHandler.appendMsg(topic, "this is a test content");
+        messageAppendHandler.appendMsg(topic, "jojo test".getBytes());
         messageAppendHandler.readMsg(topic);
     }
 
