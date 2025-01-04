@@ -4,9 +4,11 @@ import com.helium.nettymq.broker.config.GlobalProperties;
 import com.helium.nettymq.broker.config.TopicInfo;
 import com.helium.nettymq.broker.model.MqTopicModel;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 统一缓存对象
@@ -14,7 +16,7 @@ import java.util.Map;
 public class CommonCache {
 
     public static GlobalProperties globalProperties = new GlobalProperties();
-    public static Map<String, MqTopicModel> mqTopicModelList = new HashMap<>();
+    public static List<MqTopicModel> mqTopicModelList = new ArrayList<>();
 
     public static TopicInfo topicInfo = new TopicInfo();
 
@@ -27,10 +29,18 @@ public class CommonCache {
     }
 
     public static Map<String, MqTopicModel> getMqTopicModelMap() {
-        return mqTopicModelList;
+        return mqTopicModelList.stream().collect(Collectors.toMap(MqTopicModel::getTopic, item -> item));
     }
 
     public static void setMqTopicModelMap(Map<String, MqTopicModel> mqTopicModelList) {
+        CommonCache.mqTopicModelList = mqTopicModelList;
+    }
+
+    public static List<MqTopicModel> getMqTopicModelList() {
+        return mqTopicModelList;
+    }
+
+    public static void setMqTopicModelList(List<MqTopicModel> mqTopicModelList) {
         CommonCache.mqTopicModelList = mqTopicModelList;
     }
 
