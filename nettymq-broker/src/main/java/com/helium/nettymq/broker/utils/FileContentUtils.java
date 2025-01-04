@@ -5,9 +5,11 @@ import com.helium.nettymq.broker.model.MqTopicModel;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
-public class FileContentReaderUtils {
+public class FileContentUtils {
 
     public static String readFromFile(String path) {
         try (BufferedReader in = new BufferedReader(new FileReader(path))) {
@@ -21,8 +23,16 @@ public class FileContentReaderUtils {
         }
     }
 
+    public static void overWriteToFile(String path, String content) {
+        try (FileWriter fileWriter = new FileWriter(path)) {
+            fileWriter.write(content);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void main(String[] args) {
-        String content = FileContentReaderUtils.readFromFile("C:\\Programming\\programming-works\\github-projects\\Java\\eaglemq\\nettymq\\broker\\config\\mq-topic.json");
+        String content = FileContentUtils.readFromFile("C:\\Programming\\programming-works\\github-projects\\Java\\eaglemq\\nettymq\\broker\\config\\mq-topic.json");
         System.out.println(content);
 
         List<MqTopicModel> mqTopicModelList = JSON.parseArray(content, MqTopicModel.class);
