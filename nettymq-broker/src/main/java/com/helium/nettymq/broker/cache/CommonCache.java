@@ -32,10 +32,6 @@ public class CommonCache {
         return mqTopicModelList.stream().collect(Collectors.toMap(MqTopicModel::getTopic, item -> item));
     }
 
-    public static void setMqTopicModelMap(Map<String, MqTopicModel> mqTopicModelList) {
-        CommonCache.mqTopicModelList = mqTopicModelList;
-    }
-
     public static List<MqTopicModel> getMqTopicModelList() {
         return mqTopicModelList;
     }
