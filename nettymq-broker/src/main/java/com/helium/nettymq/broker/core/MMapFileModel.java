@@ -72,7 +72,7 @@ public class MMapFileModel {
             throw new IllegalArgumentException("topic is inValid! topicName is " + topicName);
         }
         CommitLogModel commitLogModel = mqTopicModel.getCommitLogModel();
-        long diff = commitLogModel.getOffsetLimit() - commitLogModel.getOffset();
+        long diff = commitLogModel.countDiff();
         String filePath = null;
         if (diff == 0) { //已经写满了
             filePath = this.createNewCommitLogFile(topicName, commitLogModel);
@@ -80,6 +80,7 @@ public class MMapFileModel {
             filePath = CommonCache.getGlobalProperties().getMqHome()
                     + BrokerConstants.BASE_STORE_PATH
                     + topicName
+                    + "/"
                     + commitLogModel.getFileName();
         }
         return filePath;
@@ -90,6 +91,7 @@ public class MMapFileModel {
         String newFilePath = CommonCache.getGlobalProperties().getMqHome()
                 + BrokerConstants.BASE_STORE_PATH
                 + topicName
+                + "/"
                 + newFileName;
         File newCommitLogFile = new File(newFilePath);
         try {
@@ -137,11 +139,20 @@ public class MMapFileModel {
         //offset会用一个原子类AtomicLong去管理
         //线程安全问题：线程1：111，线程2：122
         //加锁机制 （锁的选择非常重要）
+        MqTopicModel mqTopicModel = CommonCache.getMqTopicModelMap().get(topic);
+        if (mqTopicModel == null) {
+            throw new IllegalArgumentException("mqTopicModel is null");
+        }
+        CommitLogModel commitLogModel = mqTopicModel.getCommitLogModel();
+        if (commitLogModel == null) {
+            throw new IllegalArgumentException("commitLogModel is null");
+        }
         this.checkCommitLogHasEnableSpace(commitLogMessageModel);
 
         // 默认刷到page cache中，
         // 如果需要强制刷盘，需要兼容
         mappedByteBuffer.put(commitLogMessageModel.convertToBytes());
+        commitLogModel.getOffset().addAndGet(commitLogMessageModel.getSize());
         // 强制刷盘
         if (force) {
             mappedByteBuffer.force();
@@ -151,7 +162,7 @@ public class MMapFileModel {
     private void checkCommitLogHasEnableSpace(CommitLogMessageModel commitLogMessageModel) throws IOException {
         MqTopicModel mqTopicModel = CommonCache.getMqTopicModelMap().get(topic);
         CommitLogModel commitLogModel = mqTopicModel.getCommitLogModel();
-        long writeAbleOffsetNum = commitLogModel.getOffsetLimit() - commitLogModel.getOffset();
+        long writeAbleOffsetNum = commitLogModel.countDiff();
         //空间不足，需要创建新的commitLog文件并且做映射
         if (!(writeAbleOffsetNum >= commitLogMessageModel.getSize())) {
             //00000000文件 -》00000001文件

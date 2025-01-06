@@ -1,5 +1,6 @@
 package com.helium.nettymq.broker.core;
 
+import com.helium.nettymq.broker.constants.BrokerConstants;
 import com.helium.nettymq.broker.model.CommitLogMessageModel;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ public class CommentLogAppendHandler {
 
     public void prepareMMapLoading(String topicName) throws IOException {
         MMapFileModel mapFileModel = new MMapFileModel();
-        mapFileModel.loadFileInMMap(topicName, 0, 1 * 1024 * 1024);
+        mapFileModel.loadFileInMMap(topicName, 0, BrokerConstants.COMMIT_LOG_DEFAULT_MMAP_SIZE);
         mMapFileModelManager.put(topicName, mapFileModel);
     }
 
