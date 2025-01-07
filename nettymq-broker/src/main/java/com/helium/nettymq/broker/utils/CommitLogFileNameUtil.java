@@ -1,9 +1,26 @@
 package com.helium.nettymq.broker.utils;
 
+import com.helium.nettymq.broker.cache.CommonCache;
+import com.helium.nettymq.broker.constants.BrokerConstants;
+
 public class CommitLogFileNameUtil {
 
     public static String buildFirstCommitLogName() {
         return "00000000";
+    }
+
+    /**
+     * 构建新的commitLog文件路径
+     * @param topicName
+     * @param commitLogFileName
+     * @return
+     */
+    public static String buildCommitLogFilePath(String topicName, String commitLogFileName) {
+        return CommonCache.getGlobalProperties().getMqHome()
+                + BrokerConstants.BASE_STORE_PATH
+                + topicName
+                + "/"
+                + commitLogFileName;
     }
 
     public static String incrCommitLogFileName(String oldFileName) {

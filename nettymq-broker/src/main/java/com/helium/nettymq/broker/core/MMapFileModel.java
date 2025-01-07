@@ -19,6 +19,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 基础mmap对象模型
@@ -75,31 +76,12 @@ public class MMapFileModel {
         long diff = commitLogModel.countDiff();
         String filePath = null;
         if (diff == 0) { //已经写满了
-            filePath = this.createNewCommitLogFile(topicName, commitLogModel);
+            CommitLogFilePath commitLogFilePath = this.createNewCommitLogFile(topicName, commitLogModel);
+            filePath = commitLogFilePath.getFilePath();
         } else if (diff > 0) { //还有机会写入
-            filePath = CommonCache.getGlobalProperties().getMqHome()
-                    + BrokerConstants.BASE_STORE_PATH
-                    + topicName
-                    + "/"
-                    + commitLogModel.getFileName();
+            filePath = CommitLogFileNameUtil.buildCommitLogFilePath(topicName, commitLogModel.getFileName());
         }
         return filePath;
-    }
-
-    private String createNewCommitLogFile(String topicName, CommitLogModel commitLogModel) {
-        String newFileName = CommitLogFileNameUtil.incrCommitLogFileName(commitLogModel.getFileName());
-        String newFilePath = CommonCache.getGlobalProperties().getMqHome()
-                + BrokerConstants.BASE_STORE_PATH
-                + topicName
-                + "/"
-                + newFileName;
-        File newCommitLogFile = new File(newFilePath);
-        try {
-            newCommitLogFile.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return newFilePath;
     }
 
     /**
@@ -167,9 +149,12 @@ public class MMapFileModel {
         if (!(writeAbleOffsetNum >= commitLogMessageModel.getSize())) {
             //00000000文件 -》00000001文件
             //commitLog剩余150byte大小的空间，最新的消息体积是151byte
-            String newCommitLogPath = this.createNewCommitLogFile(topic, commitLogModel);
+            CommitLogFilePath newCommitLogPath = this.createNewCommitLogFile(topic, commitLogModel);
+            commitLogModel.setOffsetLimit(Long.valueOf(BrokerConstants.COMMIT_LOG_DEFAULT_MMAP_SIZE));
+            commitLogModel.setOffset(new AtomicInteger(0));
+            commitLogModel.setFileName(newCommitLogPath.getFileName());
             // 新文件路径映射进来
-            this.doMMap(newCommitLogPath, 0, BrokerConstants.COMMIT_LOG_DEFAULT_MMAP_SIZE);
+            this.doMMap(newCommitLogPath.getFilePath(), 0, BrokerConstants.COMMIT_LOG_DEFAULT_MMAP_SIZE);
         }
     }
 
@@ -229,5 +214,43 @@ public class MMapFileModel {
         } else {
             return viewed(viewedBuffer);
         }
+    }
+
+    class CommitLogFilePath {
+        private String fileName;
+        private String filePath;
+
+        public CommitLogFilePath(String fileName, String filePath) {
+            this.fileName = fileName;
+            this.filePath = filePath;
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
+
+        public void setFileName(String fileName) {
+            this.fileName = fileName;
+        }
+
+        public String getFilePath() {
+            return filePath;
+        }
+
+        public void setFilePath(String filePath) {
+            this.filePath = filePath;
+        }
+    }
+
+    private CommitLogFilePath createNewCommitLogFile(String topicName, CommitLogModel commitLogModel) {
+        String newFileName = CommitLogFileNameUtil.incrCommitLogFileName(commitLogModel.getFileName());
+        String newFilePath = CommitLogFileNameUtil.buildCommitLogFilePath(topicName, commitLogModel.getFileName());
+        File newCommitLogFile = new File(newFilePath);
+        try {
+            newCommitLogFile.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new CommitLogFilePath(newFileName, newFilePath);
     }
 }

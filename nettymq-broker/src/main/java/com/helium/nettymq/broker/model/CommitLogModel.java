@@ -1,5 +1,6 @@
 package com.helium.nettymq.broker.model;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class CommitLogModel {
@@ -8,7 +9,7 @@ public class CommitLogModel {
 
     private Long offsetLimit;
 
-    private AtomicLong offset;
+    private AtomicInteger offset;
 
     public String getFileName() {
         return fileName;
@@ -26,11 +27,11 @@ public class CommitLogModel {
         this.offsetLimit = offsetLimit;
     }
 
-    public AtomicLong getOffset() {
+    public AtomicInteger getOffset() {
         return offset;
     }
 
-    public void setOffset(AtomicLong offset) {
+    public void setOffset(AtomicInteger offset) {
         this.offset = offset;
     }
 
