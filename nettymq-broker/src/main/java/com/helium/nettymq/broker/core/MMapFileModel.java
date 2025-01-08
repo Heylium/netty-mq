@@ -6,6 +6,8 @@ import com.helium.nettymq.broker.model.CommitLogMessageModel;
 import com.helium.nettymq.broker.model.CommitLogModel;
 import com.helium.nettymq.broker.model.MqTopicModel;
 import com.helium.nettymq.broker.utils.CommitLogFileNameUtil;
+import com.helium.nettymq.broker.utils.PutMessageLock;
+import com.helium.nettymq.broker.utils.UnfailReentrantLock;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,6 +34,7 @@ public class MMapFileModel {
     private MappedByteBuffer mappedByteBuffer;
     private FileChannel fileChannel;
     private String topic;
+    private PutMessageLock putMessageLock;
 
     /**
      * 指定offset做文件的映射
@@ -44,6 +47,8 @@ public class MMapFileModel {
         this.topic = topicName;
         String filePath = getLatestCommitLogFile(topicName);
         this.doMMap(filePath, startOffset, mappedSize);
+        // 默认非公平锁
+        putMessageLock = new UnfailReentrantLock();
     }
 
     /**
@@ -133,12 +138,14 @@ public class MMapFileModel {
 
         // 默认刷到page cache中，
         // 如果需要强制刷盘，需要兼容
+        putMessageLock.lock();
         mappedByteBuffer.put(commitLogMessageModel.convertToBytes());
         commitLogModel.getOffset().addAndGet(commitLogMessageModel.getSize());
         // 强制刷盘
         if (force) {
             mappedByteBuffer.force();
         }
+        putMessageLock.unlock();
     }
 
     private void checkCommitLogHasEnableSpace(CommitLogMessageModel commitLogMessageModel) throws IOException {
