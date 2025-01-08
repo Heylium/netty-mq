@@ -10,6 +10,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.concurrent.CountDownLatch;
 
 public class MMapUtil {
 
@@ -131,6 +132,34 @@ public class MMapUtil {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException, IOException {
+        MMapUtil mMapUtil = new MMapUtil();
+        // 映射1mb
+        mMapUtil.loadFileInMMap("C:\\Programming\\programming-works\\github-projects\\Java\\eaglemq\\nettymq\\broker\\store\\order_cancel_topic\\00000000", 0, 1 * 1024 * 1024);
+        CountDownLatch count = new CountDownLatch(1);
+        CountDownLatch allWriterSuccess = new CountDownLatch(10);
+        for (int i = 0; i < 10; i++) {
+            int finalI = i;
+            Thread task = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        count.await();
+                        // 多线程并发写
+                        mMapUtil.writeContent(("test-content-" + finalI).getBytes());
+                        allWriterSuccess.countDown();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+            task.start();
+        }
+        System.out.println("准备执行并发写入mmap测试");
+        count.countDown();
+        allWriterSuccess.await();
+        System.out.println("并发测试完毕,读取文件内容测试");
+        byte[] content = mMapUtil.readContent(0, 1000);
+        System.out.println("内容：" + new String(content));
     }
 }
