@@ -134,13 +134,13 @@ public class MMapFileModel {
         if (commitLogModel == null) {
             throw new IllegalArgumentException("commitLogModel is null");
         }
-        this.checkCommitLogHasEnableSpace(commitLogMessageModel);
-
         // 默认刷到page cache中，
         // 如果需要强制刷盘，需要兼容
         putMessageLock.lock();
-        mappedByteBuffer.put(commitLogMessageModel.convertToBytes());
-        commitLogModel.getOffset().addAndGet(commitLogMessageModel.getSize());
+        this.checkCommitLogHasEnableSpace(commitLogMessageModel);
+        byte[] writeContent = commitLogMessageModel.convertToBytes();
+        mappedByteBuffer.put(writeContent);
+        commitLogModel.getOffset().addAndGet(writeContent.length);
         // 强制刷盘
         if (force) {
             mappedByteBuffer.force();
@@ -251,10 +251,11 @@ public class MMapFileModel {
 
     private CommitLogFilePath createNewCommitLogFile(String topicName, CommitLogModel commitLogModel) {
         String newFileName = CommitLogFileNameUtil.incrCommitLogFileName(commitLogModel.getFileName());
-        String newFilePath = CommitLogFileNameUtil.buildCommitLogFilePath(topicName, commitLogModel.getFileName());
+        String newFilePath = CommitLogFileNameUtil.buildCommitLogFilePath(topicName, newFileName);
         File newCommitLogFile = new File(newFilePath);
         try {
             newCommitLogFile.createNewFile();
+            System.out.println("创建新的commitlog文件" + newFileName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
