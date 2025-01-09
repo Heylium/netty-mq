@@ -35,6 +35,7 @@ public class MqTopicLoader {
                 do {
                     try {
                         TimeUnit.SECONDS.sleep(BrokerConstants.DEFAULT_REFRESH_MQ_TOPIC_TIME_STEP);
+                        System.out.println("刷新磁盘");
                         List<MqTopicModel> mqTopicModelList = CommonCache.getMqTopicModelList();
                         FileContentUtils.overWriteToFile(filePath, JSON.toJSONString(mqTopicModelList));
                     } catch (InterruptedException e) {
