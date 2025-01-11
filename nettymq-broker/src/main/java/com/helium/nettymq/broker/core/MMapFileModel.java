@@ -4,6 +4,7 @@ import com.helium.nettymq.broker.cache.CommonCache;
 import com.helium.nettymq.broker.constants.BrokerConstants;
 import com.helium.nettymq.broker.model.CommitLogMessageModel;
 import com.helium.nettymq.broker.model.CommitLogModel;
+import com.helium.nettymq.broker.model.ConsumerQueueDetailModel;
 import com.helium.nettymq.broker.model.MqTopicModel;
 import com.helium.nettymq.broker.utils.CommitLogFileNameUtil;
 import com.helium.nettymq.broker.utils.PutMessageLock;
@@ -140,7 +141,9 @@ public class MMapFileModel {
         this.checkCommitLogHasEnableSpace(commitLogMessageModel);
         byte[] writeContent = commitLogMessageModel.convertToBytes();
         mappedByteBuffer.put(writeContent);
-        commitLogModel.getOffset().addAndGet(writeContent.length);
+        AtomicInteger currentLatestMsgOffset = commitLogModel.getOffset();
+        this.dispatcher(writeContent, currentLatestMsgOffset.get());
+        currentLatestMsgOffset.addAndGet(writeContent.length);
         // 强制刷盘
         if (force) {
             mappedByteBuffer.force();
@@ -148,12 +151,23 @@ public class MMapFileModel {
         putMessageLock.unlock();
     }
 
+    private void dispatcher(byte[] writeContent, int msgIndex) {
+        MqTopicModel mqTopicModel = CommonCache.getMqTopicModelMap().get(topic);
+        if (mqTopicModel == null) {
+            throw new RuntimeException("topic is undefined");
+        }
+        ConsumerQueueDetailModel consumerQueueDetailModel = new ConsumerQueueDetailModel();
+        consumerQueueDetailModel.setCommitLogIndex(Integer.parseInt(mqTopicModel.getCommitLogModel().getFileName()));
+        consumerQueueDetailModel.setMsgIndex(msgIndex);
+        consumerQueueDetailModel.setMsgLength(writeContent.length);
+    }
+
     private void checkCommitLogHasEnableSpace(CommitLogMessageModel commitLogMessageModel) throws IOException {
         MqTopicModel mqTopicModel = CommonCache.getMqTopicModelMap().get(topic);
         CommitLogModel commitLogModel = mqTopicModel.getCommitLogModel();
         long writeAbleOffsetNum = commitLogModel.countDiff();
         //空间不足，需要创建新的commitLog文件并且做映射
-        if (!(writeAbleOffsetNum >= commitLogMessageModel.getSize())) {
+        if (!(writeAbleOffsetNum >= commitLogMessageModel.convertToBytes().length)) {
             //00000000文件 -》00000001文件
             //commitLog剩余150byte大小的空间，最新的消息体积是151byte
             CommitLogFilePath newCommitLogPath = this.createNewCommitLogFile(topic, commitLogModel);
