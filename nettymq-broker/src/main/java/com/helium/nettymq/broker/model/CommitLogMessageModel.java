@@ -7,17 +7,7 @@ import com.helium.nettymq.broker.utils.ByteConvertUtils;
  */
 public class CommitLogMessageModel {
 
-    private int size;
-
     private byte[] content;
-
-    public int getSize() {
-        return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
-    }
 
     public byte[] getContent() {
         return content;
@@ -28,16 +18,6 @@ public class CommitLogMessageModel {
     }
 
     public byte[] convertToBytes() {
-        byte[] sizeBytes = ByteConvertUtils.intToBytes(this.getSize());
-        byte[] content = this.getContent();
-        byte[] mergeResultByte = new byte[sizeBytes.length + content.length];
-        int j = 0;
-        for (int i = 0; i < sizeBytes.length; i++, j++) {
-            mergeResultByte[j] = sizeBytes[i];
-        }
-        for (int i = 0; i < content.length; i++, j++) {
-            mergeResultByte[j] = content[i];
-        }
-        return mergeResultByte;
+        return this.getContent();
     }
 }

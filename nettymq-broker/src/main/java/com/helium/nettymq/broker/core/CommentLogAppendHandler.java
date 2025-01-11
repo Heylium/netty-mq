@@ -25,7 +25,6 @@ public class CommentLogAppendHandler {
             throw new RuntimeException("topic is invalid!");
         }
         CommitLogMessageModel commitLogMessageModel = new CommitLogMessageModel();
-        commitLogMessageModel.setSize(content.length);
         commitLogMessageModel.setContent(content);
         mapFileModel.writeContent(commitLogMessageModel);
     }

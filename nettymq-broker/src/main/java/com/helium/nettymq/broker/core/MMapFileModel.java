@@ -157,7 +157,7 @@ public class MMapFileModel {
             throw new RuntimeException("topic is undefined");
         }
         ConsumerQueueDetailModel consumerQueueDetailModel = new ConsumerQueueDetailModel();
-        consumerQueueDetailModel.setCommitLogFileName(mqTopicModel.getCommitLogModel().getFileName());
+        consumerQueueDetailModel.setCommitLogIndex(Integer.parseInt(mqTopicModel.getCommitLogModel().getFileName()));
         consumerQueueDetailModel.setMsgIndex(msgIndex);
         consumerQueueDetailModel.setMsgLength(writeContent.length);
     }
@@ -167,7 +167,7 @@ public class MMapFileModel {
         CommitLogModel commitLogModel = mqTopicModel.getCommitLogModel();
         long writeAbleOffsetNum = commitLogModel.countDiff();
         //空间不足，需要创建新的commitLog文件并且做映射
-        if (!(writeAbleOffsetNum >= commitLogMessageModel.getSize())) {
+        if (!(writeAbleOffsetNum >= commitLogMessageModel.convertToBytes().length)) {
             //00000000文件 -》00000001文件
             //commitLog剩余150byte大小的空间，最新的消息体积是151byte
             CommitLogFilePath newCommitLogPath = this.createNewCommitLogFile(topic, commitLogModel);
