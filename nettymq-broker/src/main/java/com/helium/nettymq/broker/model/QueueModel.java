@@ -3,9 +3,10 @@ package com.helium.nettymq.broker.model;
 public class QueueModel {
 
     private Integer id;
-    private Long minOffset;
-    private Long maxOffset;
-    private Long currentOffset;
+    private String fileName;
+    private Integer offsetLimit;
+    private Integer latestOffset;
+    private Integer lastOffset;
 
     public Integer getId() {
         return id;
@@ -15,36 +16,35 @@ public class QueueModel {
         this.id = id;
     }
 
-    public Long getMinOffset() {
-        return minOffset;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setMinOffset(Long minOffset) {
-        this.minOffset = minOffset;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
-    public Long getCurrentOffset() {
-        return currentOffset;
+    public Integer getOffsetLimit() {
+        return offsetLimit;
     }
 
-    public void setCurrentOffset(Long currentOffset) {
-        this.currentOffset = currentOffset;
+    public void setOffsetLimit(Integer offsetLimit) {
+        this.offsetLimit = offsetLimit;
     }
 
-    public Long getMaxOffset() {
-        return maxOffset;
+    public Integer getLatestOffset() {
+        return latestOffset;
     }
 
-    public void setMaxOffset(Long maxOffset) {
-        this.maxOffset = maxOffset;
+    public void setLatestOffset(Integer latestOffset) {
+        this.latestOffset = latestOffset;
     }
 
-    @Override
-    public String toString() {
-        return "QueueModel{" +
-                "id=" + id +
-                ", minOffset=" + minOffset +
-                ", currentOffset=" + currentOffset +
-                '}';
+    public Integer getLastOffset() {
+        return lastOffset;
+    }
+
+    public void setLastOffset(Integer lastOffset) {
+        this.lastOffset = lastOffset;
     }
 }

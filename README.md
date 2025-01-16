@@ -1,2 +1,2 @@
 # nettymq
-A message queue lib based on netty
+A message queue lib based on netty.
