@@ -2,6 +2,7 @@ package com.helium.nettymq.broker.cache;
 
 import com.helium.nettymq.broker.config.GlobalProperties;
 import com.helium.nettymq.broker.config.TopicInfo;
+import com.helium.nettymq.broker.model.ConsumeQueueOffsetModel;
 import com.helium.nettymq.broker.model.MqTopicModel;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class CommonCache {
 
     public static GlobalProperties globalProperties = new GlobalProperties();
     public static List<MqTopicModel> mqTopicModelList = new ArrayList<>();
+    public static ConsumeQueueOffsetModel consumeQueueOffsetModel = new ConsumeQueueOffsetModel();
 
     public static TopicInfo topicInfo = new TopicInfo();
 
@@ -38,6 +40,14 @@ public class CommonCache {
 
     public static void setMqTopicModelList(List<MqTopicModel> mqTopicModelList) {
         CommonCache.mqTopicModelList = mqTopicModelList;
+    }
+
+    public static ConsumeQueueOffsetModel getConsumeQueueOffsetModel() {
+        return consumeQueueOffsetModel;
+    }
+
+    public static void setConsumeQueueOffsetModel(ConsumeQueueOffsetModel consumeQueueOffsetModel) {
+        CommonCache.consumeQueueOffsetModel = consumeQueueOffsetModel;
     }
 
     public static TopicInfo getTopicInfo() {
